@@ -1,15 +1,46 @@
+"""
+Application Configuration
+-------------------------
+Loads all application settings from environment variables.
+"""
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Centralized application settings loaded from environment variables."""
+    """Centralized application settings."""
+
+    # --------------------------------------------------
+    # Application
+    # --------------------------------------------------
     APP_NAME: str = "AI Voice Agriculture Assistant"
+    VERSION: str = "1.0.0"
     APP_ENV: str = "development"
+
     DEBUG: bool = True
     HOST: str = "127.0.0.1"
     PORT: int = 8000
-    VERSION: str = "1.0.0"
 
+    # --------------------------------------------------
+    # Twilio
+    # --------------------------------------------------
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_PHONE_NUMBER: str = ""
+
+    # --------------------------------------------------
+    # Groq AI
+    # --------------------------------------------------
+    GROQ_API_KEY: str = ""
+
+    # --------------------------------------------------
+    # Speech-to-Text
+    # --------------------------------------------------
+    MAX_RECORDING_DURATION: int = 30
+
+    # --------------------------------------------------
+    # Environment
+    # --------------------------------------------------
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

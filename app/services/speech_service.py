@@ -1,41 +1,128 @@
-import os
-from typing import Optional
+"""
+Speech-to-Text Service
+----------------------
+Handles transcription of farmer voice recordings.
+Uses demo transcription during development and can later
+be connected to Groq Whisper, Google STT or Bhashini.
+"""
 
-# Language-specific default transcription fallbacks for hackathon demonstration
-DEMO_TRANSCRIPTS = {
-    "ta-IN": "என் தக்காளி இலையில் கருப்பு புள்ளிகள் மற்றும் மஞ்சள் நிற வளையங்கள் உள்ளன.",
-    "en-IN": "My tomato leaves have dark brown spots with yellow concentric rings.",
-    "te-IN": "నా టమోటా ఆకులపై నల్లటి మచ్చలు మరియు పసుపు రంగు వలయాలు ఉన్నాయి."
+import os
+from typing import Dict
+
+
+# --------------------------------------------------
+# Demo Transcripts
+# --------------------------------------------------
+
+DEMO_TRANSCRIPTS: Dict[str, str] = {
+    "ta-IN": (
+        "என் தக்காளி இலையில் கருப்பு புள்ளிகள் "
+        "மற்றும் மஞ்சள் நிற வளையங்கள் உள்ளன."
+    ),
+
+    "en-IN": (
+        "My tomato leaves have dark brown spots "
+        "with yellow concentric rings."
+    ),
+
+    "te-IN": (
+        "నా టమోటా ఆకులపై నల్లటి మచ్చలు "
+        "మరియు పసుపు రంగు వలయాలు ఉన్నాయి."
+    ),
 }
 
 
 class SpeechService:
-    """Service performing Speech-to-Text (STT) transcription on recorded voice audio."""
+    """
+    Speech-to-Text Service.
+    """
 
     @staticmethod
-    def transcribe_audio(recording_url: str, language_code: str = "en-IN") -> str:
+    def transcribe_audio(
+        recording_url: str,
+        language_code: str = "en-IN"
+    ) -> str:
         """
-        Transcribe audio recording from URL into text string.
-        
-        Args:
-            recording_url (str): Publicly accessible Twilio audio recording URL (.wav/.mp3).
-            language_code (str): Language BCP-47 code ('ta-IN', 'en-IN', 'te-IN').
-            
-        Returns:
-            str: Transcribed text of the farmer's spoken symptoms.
-        """
-        # If external Google STT / Bhashini credentials are provided in env, call STT API
-        google_credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-        
-        if google_credentials and os.path.exists(google_credentials):
-            # Production Google STT API execution placeholder
-            return SpeechService._transcribe_google_stt(recording_url, language_code)
+        Convert recorded speech into text.
 
-        # Fallback to language-appropriate demo transcription for development/testing
-        return DEMO_TRANSCRIPTS.get(language_code, DEMO_TRANSCRIPTS["en-IN"])
+        Parameters
+        ----------
+        recording_url : str
+            Twilio recording URL.
+
+        language_code : str
+            Farmer language.
+
+        Returns
+        -------
+        str
+            Transcribed text.
+        """
+
+        print("\n========================================")
+        print("Speech-to-Text")
+        print("========================================")
+        print(f"Recording URL : {recording_url}")
+        print(f"Language      : {language_code}")
+
+        # ----------------------------------------
+        # Future Whisper / Google STT Integration
+        # ----------------------------------------
+
+        if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
+            return SpeechService._transcribe_google(
+                recording_url,
+                language_code
+            )
+
+        if os.getenv("GROQ_API_KEY"):
+            return SpeechService._transcribe_whisper(
+                recording_url,
+                language_code
+            )
+
+        transcript = DEMO_TRANSCRIPTS.get(
+            language_code,
+            DEMO_TRANSCRIPTS["en-IN"]
+        )
+
+        print(f"Transcript    : {transcript}")
+        print("========================================\n")
+
+        return transcript
+
+    # --------------------------------------------------
+    # Future Google STT
+    # --------------------------------------------------
 
     @staticmethod
-    def _transcribe_google_stt(recording_url: str, language_code: str) -> str:
-        """Google Speech-to-Text API client execution logic."""
-        # Clean production interface placeholder
-        return DEMO_TRANSCRIPTS.get(language_code, DEMO_TRANSCRIPTS["en-IN"])
+    def _transcribe_google(
+        recording_url: str,
+        language_code: str
+    ) -> str:
+        """
+        Placeholder for Google Speech-to-Text.
+        """
+
+        return DEMO_TRANSCRIPTS.get(
+            language_code,
+            DEMO_TRANSCRIPTS["en-IN"]
+        )
+
+    # --------------------------------------------------
+    # Future Groq Whisper
+    # --------------------------------------------------
+
+    @staticmethod
+    def _transcribe_whisper(
+        recording_url: str,
+        language_code: str
+    ) -> str:
+        """
+        Placeholder for Groq Whisper API.
+        """
+
+        return DEMO_TRANSCRIPTS.get(
+            language_code,
+            DEMO_TRANSCRIPTS["en-IN"]
+        )

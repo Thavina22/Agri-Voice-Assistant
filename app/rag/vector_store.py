@@ -1,5 +1,5 @@
-import faiss
-import numpy as np
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 
 
 class VectorStore:
@@ -7,55 +7,41 @@ class VectorStore:
 
     def __init__(self):
 
-        self.index = None
-        self.documents = []
+        self.embeddings = HuggingFaceBgeEmbeddings(
+            model_name=
+            "BAAI/bge-m3"
+        )
+
+
+        self.db = None
 
 
 
-    def build(
+    def create_database(
         self,
-        embeddings,
         documents
     ):
 
-        dimension = embeddings.shape[1]
-
-
-        self.index = faiss.IndexFlatIP(
-            dimension
+        self.db = Chroma.from_documents(
+            documents,
+            self.embeddings,
+            persist_directory=
+            "app/vector_db"
         )
 
 
-        self.index.add(
-            np.array(embeddings)
+        return self.db
+
+
+
+    def load_database(self):
+
+        self.db = Chroma(
+            persist_directory=
+            "app/vector_db",
+            embedding_function=
+            self.embeddings
         )
 
 
-        self.documents = documents
-
-
-
-    def search(
-        self,
-        query_embedding,
-        top_k=2
-    ):
-
-
-        scores, indexes = self.index.search(
-            np.array(query_embedding),
-            top_k
-        )
-
-
-        results=[]
-
-
-        for idx in indexes[0]:
-
-            results.append(
-                self.documents[idx]
-            )
-
-
-        return results
+        return self.db
