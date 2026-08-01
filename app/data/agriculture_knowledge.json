@@ -1,0 +1,59 @@
+[
+  {
+    "crop": "Tomato",
+    "disease": "Early Blight",
+    "symptoms": [
+      "dark brown spots",
+      "yellow concentric rings",
+      "leaf drying",
+      "brown patches"
+    ],
+    "cause": "Fungal infection caused by Alternaria species",
+    "treatment": [
+      "Remove infected leaves",
+      "Avoid watering leaves directly",
+      "Apply suitable fungicide"
+    ],
+    "prevention": [
+      "Maintain proper spacing",
+      "Avoid excess moisture",
+      "Keep farm clean"
+    ]
+  },
+  {
+    "crop": "Rice",
+    "disease": "Rice Blast",
+    "symptoms": [
+      "diamond shaped spots",
+      "leaf discoloration",
+      "plant drying"
+    ],
+    "cause": "Fungal infection caused by Magnaporthe",
+    "treatment": [
+      "Use recommended fungicide",
+      "Maintain nitrogen balance"
+    ],
+    "prevention": [
+      "Use healthy seeds",
+      "Monitor field regularly"
+    ]
+  },
+  {
+    "crop": "Cotton",
+    "disease": "Bollworm Attack",
+    "symptoms": [
+      "holes in leaves",
+      "damaged cotton balls",
+      "insects visible"
+    ],
+    "cause": "Pest infestation",
+    "treatment": [
+      "Use biological control",
+      "Apply recommended pesticide"
+    ],
+    "prevention": [
+      "Regular crop monitoring",
+      "Remove infected parts"
+    ]
+  }
+]
