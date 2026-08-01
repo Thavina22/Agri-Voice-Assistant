@@ -26,43 +26,103 @@ LANGUAGES = {
 
 
 class TwilioService:
-    """Twilio TwiML generator for IVR navigation and voice recording."""
+    """
+    Twilio TwiML generator for:
+    - Language IVR
+    - Recording
+    - AI voice response
+    """
 
     @staticmethod
-    def build_ivr_menu_twiml(action_url: str = "/api/v1/voice/language") -> str:
-        """Generate TwiML for language selection IVR menu."""
+    def build_ivr_menu_twiml(
+        action_url: str = "/api/v1/voice/language"
+    ) -> str:
+
         response = VoiceResponse()
-        gather = Gather(action=action_url, method="POST", num_digits=1, timeout=8)
-        gather.say("Welcome to AI Agriculture Assistant.", voice="Polly.Aditi", language="en-IN")
-        gather.say("தமிழுக்கு 1 அழுத்தவும். Press 1 for Tamil.", voice="Polly.Aditi", language="en-IN")
-        gather.say("Press 2 for English.", voice="Polly.Aditi", language="en-IN")
-        gather.say("తెలుగు కోసం 3 నొక్కండి. Press 3 for Telugu.", voice="Polly.Aditi", language="en-IN")
+
+        gather = Gather(
+            action=action_url,
+            method="POST",
+            num_digits=1,
+            timeout=8
+        )
+
+        gather.say(
+            "Welcome to AI Agriculture Assistant.",
+            voice="Polly.Aditi",
+            language="en-IN"
+        )
+
+        gather.say(
+            "தமிழுக்கு 1 அழுத்தவும். Press 1 for Tamil.",
+            voice="Polly.Aditi",
+            language="en-IN"
+        )
+
+        gather.say(
+            "Press 2 for English.",
+            voice="Polly.Aditi",
+            language="en-IN"
+        )
+
+        gather.say(
+            "తెలుగు కోసం 3 నొక్కండి. Press 3 for Telugu.",
+            voice="Polly.Aditi",
+            language="en-IN"
+        )
+
         response.append(gather)
-        response.say("We did not receive your selection.", voice="Polly.Aditi", language="en-IN")
-        response.redirect("/api/v1/voice/incoming", method="POST")
+
+        response.say(
+            "We did not receive your selection.",
+            voice="Polly.Aditi",
+            language="en-IN"
+        )
+
+        response.redirect(
+            "/api/v1/voice/incoming",
+            method="POST"
+        )
+
         return str(response)
 
+
     @staticmethod
-    def build_recording_prompt_twiml(digits: str) -> str:
-        """Generate TwiML with <Record> verb configured with optimal parameters."""
+    def build_recording_prompt_twiml(
+        digits: str
+    ) -> str:
+
         response = VoiceResponse()
+
         lang_info = LANGUAGES.get(digits)
 
         if not lang_info:
-            response.say("Invalid selection. Please try again.", voice="Polly.Aditi", language="en-IN")
-            response.redirect("/api/v1/voice/incoming", method="POST")
+            response.say(
+                "Invalid selection. Please try again.",
+                voice="Polly.Aditi",
+                language="en-IN"
+            )
+
+            response.redirect(
+                "/api/v1/voice/incoming",
+                method="POST"
+            )
+
             return str(response)
 
-        response.say(lang_info["prompt"], voice=lang_info["voice"], language=lang_info["code"])
-        record_action = f"/api/v1/voice/recording?lang={lang_info['code']}"
-        
-        # Twilio Record parameters:
-        # action: Callback endpoint when recording completes
-        # method: POST for form data submission
-        # timeout: 5s silence auto-stops recording
-        # max_length: 30s limit to control STT cost and latency
-        # play_beep: True audio cue for farmer to start speaking
-        # trim: Trim leading/trailing silence from audio
+
+        response.say(
+            lang_info["prompt"],
+            voice=lang_info["voice"],
+            language=lang_info["code"]
+        )
+
+
+        record_action = (
+            f"/api/v1/voice/recording?lang={lang_info['code']}"
+        )
+
+
         response.record(
             action=record_action,
             method="POST",
@@ -71,12 +131,66 @@ class TwilioService:
             play_beep=True,
             trim="trim-silence"
         )
+
+
         return str(response)
 
+
+
     @staticmethod
-    def build_recording_received_twiml(lang_code: str = "en-IN") -> str:
-        """Generate TwiML confirmation response after audio is recorded."""
+    def build_recording_received_twiml(
+        lang_code: str = "en-IN"
+    ) -> str:
+
         response = VoiceResponse()
-        lang_config = next((v for v in LANGUAGES.values() if v["code"] == lang_code), LANGUAGES["2"])
-        response.say(lang_config["received"], voice=lang_config["voice"], language=lang_config["code"])
+
+        lang_config = next(
+            (
+                v for v in LANGUAGES.values()
+                if v["code"] == lang_code
+            ),
+            LANGUAGES["2"]
+        )
+
+
+        response.say(
+            lang_config["received"],
+            voice=lang_config["voice"],
+            language=lang_config["code"]
+        )
+
+
+        return str(response)
+
+
+
+    @staticmethod
+    def build_ai_response_twiml(
+        message: str,
+        lang_code: str = "en-IN"
+    ) -> str:
+        """
+        Generate TwiML response for AI agriculture advice.
+        Farmer hears the AI generated solution.
+        """
+
+        response = VoiceResponse()
+
+
+        lang_config = next(
+            (
+                v for v in LANGUAGES.values()
+                if v["code"] == lang_code
+            ),
+            LANGUAGES["2"]
+        )
+
+
+        response.say(
+            message,
+            voice=lang_config["voice"],
+            language=lang_config["code"]
+        )
+
+
         return str(response)
