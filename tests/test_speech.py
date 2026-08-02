@@ -1,10 +1,17 @@
 from app.services.speech_service import SpeechService
 from app.services.call_session_service import CallSessionService
-from app.models.call_session import CallStage
+from app.utils.constants import CallStage
 
 
 def setup_function():
     CallSessionService.clear_all()
+
+
+def test_speech_service_validation():
+    """Verify audio URL validation logic."""
+    assert SpeechService.validate_recording("https://api.twilio.com/audio.wav") is True
+    assert SpeechService.validate_recording("invalid_url") is False
+    assert SpeechService.validate_recording(None) is False
 
 
 def test_speech_service_transcribe_english():

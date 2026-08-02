@@ -1,0 +1,12 @@
+class CallStage:
+    """Centralized constants for call processing lifecycle stages."""
+    WELCOME = "Welcome"
+    LANGUAGE_SELECTED = "Language Selected"
+    RECORDING_STARTED = "Recording Started"
+    RECORDING_COMPLETED = "Recording Completed"
+    TRANSCRIBING = "Transcribing"
+    TRANSCRIPTION_COMPLETED = "Transcription Completed"
+    ROOT_CAUSE_ANALYSIS = "Root Cause Analysis"
+    AI_RESPONSE_GENERATED = "AI Response Generated"
+    VOICE_RESPONSE = "Voice Response"
+    CALL_COMPLETED = "Call Completed"

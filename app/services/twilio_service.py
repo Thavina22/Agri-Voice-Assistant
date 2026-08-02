@@ -29,15 +29,15 @@ class TwilioService:
     """
     Twilio TwiML generator for:
     - Language IVR
-    - Recording
-    - AI voice response
+    - Voice Recording
+    - Gemini AI Voice Response
+    - Graceful Error Apologies
     """
 
     @staticmethod
     def build_ivr_menu_twiml(
         action_url: str = "/api/v1/voice/language"
     ) -> str:
-
         response = VoiceResponse()
 
         gather = Gather(
@@ -86,15 +86,15 @@ class TwilioService:
 
         return str(response)
 
-
     @staticmethod
     def build_recording_prompt_twiml(
         digits: str
     ) -> str:
-
         response = VoiceResponse()
-
-        lang_info = LANGUAGES.get(digits)
+        digits_str = str(digits).strip() if digits is not None else ""
+        lang_info = LANGUAGES.get(digits_str)
+        if not lang_info:
+            lang_info = next((v for v in LANGUAGES.values() if v["code"] == digits_str), None)
 
         if not lang_info:
             response.say(
@@ -102,14 +102,11 @@ class TwilioService:
                 voice="Polly.Aditi",
                 language="en-IN"
             )
-
             response.redirect(
                 "/api/v1/voice/incoming",
                 method="POST"
             )
-
             return str(response)
-
 
         response.say(
             lang_info["prompt"],
@@ -117,11 +114,9 @@ class TwilioService:
             language=lang_info["code"]
         )
 
-
         record_action = (
             f"/api/v1/voice/recording?lang={lang_info['code']}"
         )
-
 
         response.record(
             action=record_action,
@@ -132,26 +127,17 @@ class TwilioService:
             trim="trim-silence"
         )
 
-
         return str(response)
-
-
 
     @staticmethod
     def build_recording_received_twiml(
         lang_code: str = "en-IN"
     ) -> str:
-
         response = VoiceResponse()
-
         lang_config = next(
-            (
-                v for v in LANGUAGES.values()
-                if v["code"] == lang_code
-            ),
+            (v for v in LANGUAGES.values() if v["code"] == lang_code),
             LANGUAGES["2"]
         )
-
 
         response.say(
             lang_config["received"],
@@ -159,10 +145,7 @@ class TwilioService:
             language=lang_config["code"]
         )
 
-
         return str(response)
-
-
 
     @staticmethod
     def build_ai_response_twiml(
@@ -171,20 +154,14 @@ class TwilioService:
     ) -> str:
         """
         Generate TwiML response for AI agriculture advice.
-        Farmer hears the AI generated solution.
+        Farmer hears the AI generated solution and call hangs up gracefully.
         """
-
         response = VoiceResponse()
 
-
         lang_config = next(
-            (
-                v for v in LANGUAGES.values()
-                if v["code"] == lang_code
-            ),
+            (v for v in LANGUAGES.values() if v["code"] == lang_code),
             LANGUAGES["2"]
         )
-
 
         response.say(
             message,
@@ -192,5 +169,36 @@ class TwilioService:
             language=lang_config["code"]
         )
 
+        response.hangup()
+        return str(response)
+
+    @staticmethod
+    def build_apology_twiml(
+        lang_code: str = "en-IN"
+    ) -> str:
+        """
+        Generate TwiML apology response when an unexpected error occurs.
+        Hangs up gracefully after playing localized apology.
+        """
+        response = VoiceResponse()
+
+        apologies = {
+            "ta-IN": "மன்னிக்கவும். ஒரு தொழில்நுட்ப பிழை ஏற்பட்டது. தயவுசெய்து பின்னர் முயற்சிக்கவும்.",
+            "en-IN": "We apologize. A technical issue occurred while processing your call. Please try again later.",
+            "te-IN": "క్షమించండి. సాంకేతిక లోపం సంభవించింది. దయచేసి తర్వాత మళ్లీ ప్రయత్నించండి."
+        }
+
+        lang_config = next(
+            (v for v in LANGUAGES.values() if v["code"] == lang_code),
+            LANGUAGES["2"]
+        )
+
+        text = apologies.get(lang_code, apologies["en-IN"])
+        response.say(
+            text,
+            voice=lang_config["voice"],
+            language=lang_config["code"]
+        )
+        response.hangup()
 
         return str(response)

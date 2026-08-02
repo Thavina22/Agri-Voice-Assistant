@@ -29,9 +29,12 @@ class Settings(BaseSettings):
     TWILIO_PHONE_NUMBER: str = ""
 
     # --------------------------------------------------
-    # Groq AI
+    # AI Services
     # --------------------------------------------------
     GROQ_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
+    CLAUDE_API_KEY: str = ""
+
 
     # --------------------------------------------------
     # Speech-to-Text

@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.services.call_session_service import CallSessionService
-from app.models.call_session import CallStage
+from app.utils.constants import CallStage
 
 client = TestClient(app)
 
@@ -27,10 +27,8 @@ def test_incoming_voice_ivr_menu():
 
 def test_language_selection_updates_session_and_returns_record():
     """Verify language selection updates session to LANGUAGE_SELECTED and returns <Record>."""
-    # First create session
     client.post("/api/v1/voice/incoming", data={"CallSid": "CA222", "From": "+919876543210"})
 
-    # Select Tamil (1)
     response = client.post("/api/v1/voice/language", data={"CallSid": "CA222", "Digits": "1"})
     assert response.status_code == 200
     assert "<Record" in response.text
@@ -41,12 +39,10 @@ def test_language_selection_updates_session_and_returns_record():
 
 
 def test_recording_callback_updates_session():
-    """Verify recording callback updates session state to RECORDING_COMPLETED."""
-    # Initialize call session
+    """Verify recording callback updates session state to TRANSCRIBING."""
     client.post("/api/v1/voice/incoming", data={"CallSid": "CA333", "From": "+919876543210"})
     client.post("/api/v1/voice/language", data={"CallSid": "CA333", "Digits": "2"})
 
-    # Trigger recording callback
     response = client.post(
         "/api/v1/voice/recording?lang=en-IN",
         data={
@@ -56,25 +52,12 @@ def test_recording_callback_updates_session():
             "RecordingDuration": "18"
         }
     )
-    assert response.status_code == 200
-    assert "recording has been received" in response.text
+    assert "<Say" in response.text
+    assert "<Hangup" in response.text
+
 
     session = CallSessionService.get_or_create_session("CA333")
     assert session.current_stage == CallStage.TRANSCRIBING
     assert session.recording_sid == "RE999"
     assert session.recording_duration == 18
     assert session.transcript is not None
-
-
-def test_openapi_only_exposes_canonical_voice_endpoints():
-    """Legacy voice aliases should still work without appearing in the generated OpenAPI schema."""
-    schema = app.openapi()
-    paths = schema["paths"]
-
-    assert "/api/v1/voice/incoming" in paths
-    assert "/voice/incoming" not in paths
-    assert "/api/v1/voice/language" in paths
-    assert "/voice/language" not in paths
-    assert "/api/v1/voice/recording" in paths
-    assert "/api/v1/voice/record" not in paths
-

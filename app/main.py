@@ -4,11 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routes.health import router as health_router
 from app.routes.voice import router as voice_router
+from app.routes.dashboard import router as dashboard_router
+from app.routes.demo import router as demo_router
 
 
 def create_app() -> FastAPI:
-    """Create and configure the FastAPI application."""
-
     app = FastAPI(
         title=settings.APP_NAME,
         version=settings.VERSION,
@@ -17,24 +17,16 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
     )
 
-    # CORS Configuration
-    # During development "*" is acceptable.
-    # Before production, replace "*" with your frontend URL.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_credentials=False,
+        allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
 
-    @app.get(
-        "/",
-        tags=["Root"],
-        summary="Root",
-    )
+    @app.get("/")
     def root():
-        """API root endpoint."""
         return {
             "message": "Welcome to AI Voice Agriculture Assistant API",
             "documentation": "/docs",
@@ -42,16 +34,10 @@ def create_app() -> FastAPI:
             "voice_webhook": "/api/v1/voice/incoming",
         }
 
-    # Register Routers
-    app.include_router(
-        health_router,
-        tags=["Health Check"],
-    )
-
-    app.include_router(
-        voice_router,
-        tags=["Twilio Voice Webhook"],
-    )
+    app.include_router(health_router)
+    app.include_router(voice_router)
+    app.include_router(dashboard_router)
+    app.include_router(demo_router)
 
     return app
 
